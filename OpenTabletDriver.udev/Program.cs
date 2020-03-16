@@ -4,7 +4,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
-using TabletDriverLib.Tablet;
+using TabletDriverPlugin.Tablet;
 
 namespace OpenTabletDriver.udev
 {
@@ -58,7 +58,7 @@ namespace OpenTabletDriver.udev
 
         static async IAsyncEnumerable<TabletProperties> GetAllConfigurations(DirectoryInfo directory)
         {
-            var files = await Task<IEnumerable<string>>.Run(() => Directory.GetFiles(directory.FullName, "*.xml", SearchOption.AllDirectories));
+            var files = await Task<IEnumerable<string>>.Run(() => Directory.GetFiles(directory.FullName, "*.json", SearchOption.AllDirectories));
             foreach (var path in files)
             {
                 var file = new FileInfo(path);
