@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19577.1" />
-    <ProjectReference Include="..\..\OpenTabletDriver\TabletDriverPlugin\TabletDriverPlugin.csproj" />
+    <PackageReference Include="TabletDriverPlugin" Version="0.2.1" />
   </ItemGroup>
 
 </Project>

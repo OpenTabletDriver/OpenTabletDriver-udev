@@ -6,28 +6,51 @@
         {
             var parts = new string[]
             {
-                CreateFullProperty("SUBSYSTEM", subsystem),
-                CreateAttrProperty("idVendor", idVendor.ToHexFormat()),
-                CreateAttrProperty("idProduct", idProduct.ToHexFormat()),
-                CreateShortProperty("MODE", mode),
-                CreateShortProperty("GROUP", group)
+                Match("SUBSYSTEM", subsystem),
+                MatchATTRS("idVendor", idVendor.ToHexFormat()),
+                MatchATTRS("idProduct", idProduct.ToHexFormat()),
+                MatchENV("ID_VENDOR_ID", idVendor.ToHexFormat()),
+                MatchENV("ID_MODEL_ID", idProduct.ToHexFormat()),
+                ActionENV("LIBINPUT_IGNORE_DEVICE", "1"),
+                Action("MODE", mode),
+                Action("GROUP", group),
             };
             return string.Join(", ", parts);
         }
 
-        static string CreateAttrProperty(string index, string value)
+        private static string Match(string key, string value)
         {
-            return CreateFullProperty($@"ATTRS{{{index}}}", value);
+            return $"{key}==\"{value}\"";
         }
 
-        static string CreateFullProperty(string group, string value)
+        private static string Action(string key, string value)
         {
-            return string.Format("{0}==\"{1}\"", group, value);
+            return $"{key}=\"{value}\"";
         }
 
-        static string CreateShortProperty(string group, string value)
+        private static string NamedMatch(string name, string key, string value)
         {
-            return string.Format("{0}=\"{1}\"", group, value);
+            return Match($"{name}{{{key}}}", value);
+        }
+
+        private static string NamedAction(string name, string key, string value)
+        {
+            return Action($"{name}{{{key}}}", value);
+        }
+
+        private static string MatchENV(string key, string value)
+        {
+            return NamedMatch("ENV", key, value);
+        }
+
+        private static string ActionENV(string key, string value)
+        {
+            return NamedAction("ENV", key, value);
+        }
+
+        private static string MatchATTRS(string key, string value)
+        {
+            return NamedMatch("ATTRS", key, value);
         }
     }
 }

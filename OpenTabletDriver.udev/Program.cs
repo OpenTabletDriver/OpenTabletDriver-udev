@@ -4,6 +4,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using TabletDriverPlugin.Tablet;
 
 namespace OpenTabletDriver.udev
@@ -51,6 +52,8 @@ namespace OpenTabletDriver.udev
         {
             await foreach (var tablet in GetAllConfigurations(directory))
             {
+                if (string.IsNullOrWhiteSpace(tablet.TabletName))
+                    continue;
                 yield return string.Format("# {0}", tablet.TabletName);
                 yield return RuleCreator.CreateRule("hidraw", tablet.VendorID, tablet.ProductID, "0660", "users");
             }
