@@ -1,21 +1,29 @@
-﻿namespace OpenTabletDriver.udev
+﻿using System.Collections.Generic;
+
+namespace OpenTabletDriver.udev
 {
     internal static class RuleCreator
     {
-        public static string CreateRule(string subsystem, int idVendor, int idProduct, string mode, string group)
+        public static string CreateRule(string subsystem, int idVendor, int idProduct, string mode, string group, bool overrideLibinput = false)
         {
-            var parts = new string[]
+            var rules = new List<string>
             {
                 Match("SUBSYSTEM", subsystem),
                 MatchATTRS("idVendor", idVendor.ToHexFormat()),
                 MatchATTRS("idProduct", idProduct.ToHexFormat()),
-                MatchENV("ID_VENDOR_ID", idVendor.ToHexFormat()),
-                MatchENV("ID_MODEL_ID", idProduct.ToHexFormat()),
-                ActionENV("LIBINPUT_IGNORE_DEVICE", "1"),
                 Action("MODE", mode),
                 Action("GROUP", group),
             };
-            return string.Join(", ", parts);
+            if (overrideLibinput)
+            {
+                rules.AddRange(new string[]
+                {
+                    MatchENV("ID_VENDOR_ID", idVendor.ToHexFormat()),
+                    MatchENV("ID_MODEL_ID", idProduct.ToHexFormat()),
+                    ActionENV("LIBINPUT_IGNORE_DEVICE", "1")
+                });
+            }
+            return string.Join(", ", rules);
         }
 
         private static string Match(string key, string value)

@@ -19,16 +19,21 @@ namespace OpenTabletDriver.udev
                 new Argument<FileInfo>("output"),
                 new Option(new string[] { "--verbose", "-v" }, "Verbose output")
                 {
-                    Argument = new Argument<bool>("verbose"),
-                    Required = false
+                    Required = false,
+                    Argument = new Argument<bool>("verbose")
+                },
+                new Option(new string[] { "--libinput-override", "-l" }, "Apply the libinput override")
+                {
+                    Required = false,
+                    Argument = new Argument<bool>("overrideLibinput")
                 }
             };
 
-            root.Handler = CommandHandler.Create<DirectoryInfo, FileInfo, bool>(WriteRules);
+            root.Handler = CommandHandler.Create<DirectoryInfo, FileInfo, bool, bool>(WriteRules);
             root.Invoke(args);
         }
 
-        static async Task WriteRules(DirectoryInfo directory, FileInfo output, bool verbose = false)
+        static async Task WriteRules(DirectoryInfo directory, FileInfo output, bool verbose = false, bool libinputOverride = false)
         {
             if (output.Exists)
                 await Task.Run(output.Delete);
@@ -38,7 +43,7 @@ namespace OpenTabletDriver.udev
             Console.WriteLine($"Writing all rules to '{path}'...");
             using (var sw = output.AppendText())
             {
-                await foreach (var rule in CreateRules(directory))
+                await foreach (var rule in CreateRules(directory, libinputOverride))
                 {
                     await sw.WriteLineAsync(rule);
                     if (verbose)
@@ -48,14 +53,14 @@ namespace OpenTabletDriver.udev
             Console.WriteLine("Finished writing all rules.");
         }
 
-        static async IAsyncEnumerable<string> CreateRules(DirectoryInfo directory)
+        static async IAsyncEnumerable<string> CreateRules(DirectoryInfo directory, bool libinputOverride)
         {
             await foreach (var tablet in GetAllConfigurations(directory))
             {
                 if (string.IsNullOrWhiteSpace(tablet.TabletName))
                     continue;
                 yield return string.Format("# {0}", tablet.TabletName);
-                yield return RuleCreator.CreateRule("hidraw", tablet.VendorID, tablet.ProductID, "0660", "users");
+                yield return RuleCreator.CreateRule("hidraw", tablet.VendorID, tablet.ProductID, "0660", "users", libinputOverride);
             }
         }
 
