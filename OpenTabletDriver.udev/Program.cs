@@ -25,7 +25,7 @@ namespace OpenTabletDriver.udev
                 new Option(new string[] { "--libinput-override", "-l" }, "Apply the libinput override")
                 {
                     Required = false,
-                    Argument = new Argument<bool>("overrideLibinput")
+                    Argument = new Argument<bool>("libinputOverride")
                 }
             };
 

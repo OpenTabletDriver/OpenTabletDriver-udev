@@ -20,6 +20,7 @@ namespace OpenTabletDriver.udev
                 {
                     MatchENV("ID_VENDOR_ID", idVendor.ToHexFormat()),
                     MatchENV("ID_MODEL_ID", idProduct.ToHexFormat()),
+                    ActionENV("ID_INPUT", ""),
                     ActionENV("LIBINPUT_IGNORE_DEVICE", "1")
                 });
             }
