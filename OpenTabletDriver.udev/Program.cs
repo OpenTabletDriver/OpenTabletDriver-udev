@@ -4,6 +4,8 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
+using libudev.Rules;
+using libudev.Rules.Names;
 using Newtonsoft.Json;
 using TabletDriverPlugin.Tablet;
 
@@ -60,7 +62,9 @@ namespace OpenTabletDriver.udev
                 if (string.IsNullOrWhiteSpace(tablet.TabletName))
                     continue;
                 yield return string.Format("# {0}", tablet.TabletName);
-                yield return RuleCreator.CreateRule("hidraw", tablet.VendorID, tablet.ProductID, "0660", "users", libinputOverride);
+                yield return RuleCreator.CreateAccessRule(tablet, "0666");
+                if (libinputOverride)
+                    yield return RuleCreator.CreateOverrideRule(tablet);
             }
         }
 
