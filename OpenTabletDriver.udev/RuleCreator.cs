@@ -1,65 +1,31 @@
 ﻿using System.Collections.Generic;
+using libudev.Rules;
+using libudev.Rules.Names;
 
 namespace OpenTabletDriver.udev
 {
     internal static class RuleCreator
     {
-        public static string CreateRule(string subsystem, int idVendor, int idProduct, string mode, string group, bool overrideLibinput = false)
+        public static Rule CreateRule(string subsystem, int idVendor, int idProduct, string mode, string group, bool overrideLibinput = false)
         {
-            var rules = new List<string>
+            var tokens = new List<Token>
             {
-                Match("SUBSYSTEM", subsystem),
-                MatchATTRS("idVendor", idVendor.ToHexFormat()),
-                MatchATTRS("idProduct", idProduct.ToHexFormat()),
-                Action("MODE", mode),
-                Action("GROUP", group),
+                new Token("SUBSYSTEM", Operator.Equal, subsystem),
+                new Token("ACTION", Operator.Equal, "add|change"),
+                new ATTR("idVendor", Operator.Equal, idVendor.ToHexFormat()),
+                new ATTR("idProduct", Operator.Equal, idProduct.ToHexFormat()),
+                new Token("MODE", Operator.Assign, mode),
+                new Token("GROUP", Operator.Assign, group)
             };
             if (overrideLibinput)
             {
-                rules.AddRange(new string[]
+                tokens.AddRange(new Token[]
                 {
-                    MatchENV("ID_VENDOR_ID", idVendor.ToHexFormat()),
-                    MatchENV("ID_MODEL_ID", idProduct.ToHexFormat()),
-                    ActionENV("ID_INPUT", ""),
-                    ActionENV("LIBINPUT_IGNORE_DEVICE", "1")
+                    new ENV("ID_INPUT", Operator.Assign, ""),
+                    // new ENV("LIBINPUT_IGNORE_DEVICE", Operator.Assign, "1")
                 });
             }
-            return string.Join(", ", rules);
-        }
-
-        private static string Match(string key, string value)
-        {
-            return $"{key}==\"{value}\"";
-        }
-
-        private static string Action(string key, string value)
-        {
-            return $"{key}=\"{value}\"";
-        }
-
-        private static string NamedMatch(string name, string key, string value)
-        {
-            return Match($"{name}{{{key}}}", value);
-        }
-
-        private static string NamedAction(string name, string key, string value)
-        {
-            return Action($"{name}{{{key}}}", value);
-        }
-
-        private static string MatchENV(string key, string value)
-        {
-            return NamedMatch("ENV", key, value);
-        }
-
-        private static string ActionENV(string key, string value)
-        {
-            return NamedAction("ENV", key, value);
-        }
-
-        private static string MatchATTRS(string key, string value)
-        {
-            return NamedMatch("ATTRS", key, value);
+            return new Rule(tokens);
         }
     }
 }

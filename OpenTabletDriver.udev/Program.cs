@@ -60,7 +60,7 @@ namespace OpenTabletDriver.udev
                 if (string.IsNullOrWhiteSpace(tablet.TabletName))
                     continue;
                 yield return string.Format("# {0}", tablet.TabletName);
-                yield return RuleCreator.CreateRule("hidraw", tablet.VendorID, tablet.ProductID, "0660", "users", libinputOverride);
+                yield return RuleCreator.CreateRule("hidraw", tablet.VendorID, tablet.ProductID, "0666", "users", libinputOverride);
             }
         }
 
