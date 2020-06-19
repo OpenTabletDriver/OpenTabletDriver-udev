@@ -7,7 +7,7 @@ namespace OpenTabletDriver.udev
 {
     internal static class RuleCreator
     {
-        public static Rule CreateAccessRule(TabletProperties tablet, string mode, string group)
+        public static Rule CreateAccessRule(TabletProperties tablet, string mode)
         {
             return new Rule(new Token[]
             {
@@ -15,7 +15,6 @@ namespace OpenTabletDriver.udev
                 new ATTRS("idVendor", Operator.Equal, tablet.VendorID.ToHexFormat()),
                 new ATTRS("idProduct", Operator.Equal, tablet.ProductID.ToHexFormat()),
                 new Token("MODE", Operator.Assign, mode),
-                new Token("GROUP", Operator.Assign, group)
             });
         }
 

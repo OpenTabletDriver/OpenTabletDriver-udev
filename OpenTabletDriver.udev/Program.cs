@@ -62,7 +62,7 @@ namespace OpenTabletDriver.udev
                 if (string.IsNullOrWhiteSpace(tablet.TabletName))
                     continue;
                 yield return string.Format("# {0}", tablet.TabletName);
-                yield return RuleCreator.CreateAccessRule(tablet, "0666", "users");
+                yield return RuleCreator.CreateAccessRule(tablet, "0666");
                 if (libinputOverride)
                     yield return RuleCreator.CreateOverrideRule(tablet);
             }
