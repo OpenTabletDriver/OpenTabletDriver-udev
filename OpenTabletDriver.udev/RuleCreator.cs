@@ -1,31 +1,33 @@
 ﻿using System.Collections.Generic;
 using libudev.Rules;
 using libudev.Rules.Names;
+using TabletDriverPlugin.Tablet;
 
 namespace OpenTabletDriver.udev
 {
     internal static class RuleCreator
     {
-        public static Rule CreateRule(string subsystem, int idVendor, int idProduct, string mode, string group, bool overrideLibinput = false)
+        public static Rule CreateAccessRule(TabletProperties tablet, string mode, string group)
         {
-            var tokens = new List<Token>
+            return new Rule(new Token[]
             {
-                new Token("SUBSYSTEM", Operator.Equal, subsystem),
-                new Token("ACTION", Operator.Equal, "add|change"),
-                new ATTR("idVendor", Operator.Equal, idVendor.ToHexFormat()),
-                new ATTR("idProduct", Operator.Equal, idProduct.ToHexFormat()),
+                new Token("SUBSYSTEM", Operator.Equal, "hidraw"),
+                new ATTRS("idVendor", Operator.Equal, tablet.VendorID.ToHexFormat()),
+                new ATTRS("idProduct", Operator.Equal, tablet.ProductID.ToHexFormat()),
                 new Token("MODE", Operator.Assign, mode),
                 new Token("GROUP", Operator.Assign, group)
-            };
-            if (overrideLibinput)
+            });
+        }
+
+        public static Rule CreateOverrideRule(TabletProperties tablet)
+        {
+            return new Rule(new Token[]
             {
-                tokens.AddRange(new Token[]
-                {
-                    new ENV("ID_INPUT", Operator.Assign, ""),
-                    // new ENV("LIBINPUT_IGNORE_DEVICE", Operator.Assign, "1")
-                });
-            }
-            return new Rule(tokens);
+                new Token("SUBSYSTEM", Operator.Equal, "input"),
+                new ATTRS("idVendor", Operator.Equal, tablet.VendorID.ToHexFormat()),
+                new ATTRS("idProduct", Operator.Equal, tablet.ProductID.ToHexFormat()),
+                new ENV("LIBINPUT_IGNORE_DEVICE", Operator.Assign, "1")
+            });
         }
     }
 }
