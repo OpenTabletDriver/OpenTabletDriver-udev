@@ -10,7 +10,7 @@ namespace libudev.Rules
         {
         }
 
-        public Rule(IEnumerable<Token> tokens)
+        public Rule(params Token[] tokens)
         {
             Tokens = tokens;
         }

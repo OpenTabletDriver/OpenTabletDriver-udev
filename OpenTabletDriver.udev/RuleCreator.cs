@@ -9,24 +9,22 @@ namespace OpenTabletDriver.udev
     {
         public static Rule CreateAccessRule(TabletProperties tablet, string mode)
         {
-            return new Rule(new Token[]
-            {
+            return new Rule(
                 new Token("SUBSYSTEM", Operator.Equal, "hidraw"),
-                new ATTRS("idVendor", Operator.Equal, tablet.VendorID.ToHexFormat()),
-                new ATTRS("idProduct", Operator.Equal, tablet.ProductID.ToHexFormat()),
-                new Token("MODE", Operator.Assign, mode),
-            });
+                new ATTRS("idVendor", Operator.Equal, tablet.DigitizerIdentifier.VendorID.ToHexFormat()),
+                new ATTRS("idProduct", Operator.Equal, tablet.DigitizerIdentifier.ProductID.ToHexFormat()),
+                new Token("MODE", Operator.Assign, mode)
+            );
         }
 
         public static Rule CreateOverrideRule(TabletProperties tablet)
         {
-            return new Rule(new Token[]
-            {
+            return new Rule(
                 new Token("SUBSYSTEM", Operator.Equal, "input"),
-                new ATTRS("idVendor", Operator.Equal, tablet.VendorID.ToHexFormat()),
-                new ATTRS("idProduct", Operator.Equal, tablet.ProductID.ToHexFormat()),
+                new ATTRS("idVendor", Operator.Equal, tablet.DigitizerIdentifier.VendorID.ToHexFormat()),
+                new ATTRS("idProduct", Operator.Equal, tablet.DigitizerIdentifier.ProductID.ToHexFormat()),
                 new ENV("LIBINPUT_IGNORE_DEVICE", Operator.Assign, "1")
-            });
+            );
         }
     }
 }
