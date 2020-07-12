@@ -24,18 +24,13 @@ namespace OpenTabletDriver.udev
                     Required = false,
                     Argument = new Argument<bool>("verbose")
                 },
-                new Option(new string[] { "--libinput-override", "-l" }, "Apply the libinput override")
-                {
-                    Required = false,
-                    Argument = new Argument<bool>("libinputOverride")
-                }
             };
 
-            root.Handler = CommandHandler.Create<DirectoryInfo, FileInfo, bool, bool>(WriteRules);
+            root.Handler = CommandHandler.Create<DirectoryInfo, FileInfo, bool>(WriteRules);
             root.Invoke(args);
         }
 
-        static async Task WriteRules(DirectoryInfo directory, FileInfo output, bool verbose = false, bool libinputOverride = false)
+        static async Task WriteRules(DirectoryInfo directory, FileInfo output, bool verbose = false)
         {
             if (output.Exists)
                 await Task.Run(output.Delete);
@@ -45,7 +40,7 @@ namespace OpenTabletDriver.udev
             Console.WriteLine($"Writing all rules to '{path}'...");
             using (var sw = output.AppendText())
             {
-                await foreach (var rule in CreateRules(directory, libinputOverride))
+                await foreach (var rule in CreateRules(directory))
                 {
                     await sw.WriteLineAsync(rule);
                     if (verbose)
@@ -55,15 +50,15 @@ namespace OpenTabletDriver.udev
             Console.WriteLine("Finished writing all rules.");
         }
 
-        static async IAsyncEnumerable<string> CreateRules(DirectoryInfo directory, bool libinputOverride)
+        static async IAsyncEnumerable<string> CreateRules(DirectoryInfo directory)
         {
             await foreach (var tablet in GetAllConfigurations(directory))
             {
-                if (string.IsNullOrWhiteSpace(tablet.TabletName))
+                if (string.IsNullOrWhiteSpace(tablet.Name))
                     continue;
-                yield return string.Format("# {0}", tablet.TabletName);
+                yield return string.Format("# {0}", tablet.Name);
                 yield return RuleCreator.CreateAccessRule(tablet, "0666");
-                if (libinputOverride)
+                if (tablet.Attributes.TryGetValue("libinputoverride", out var value) && (value == "1" || value.ToLower() == "true"))
                     yield return RuleCreator.CreateOverrideRule(tablet);
             }
         }
