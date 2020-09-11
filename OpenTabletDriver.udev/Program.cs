@@ -4,10 +4,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
-using libudev.Rules;
-using libudev.Rules.Names;
-using Newtonsoft.Json;
-using TabletDriverPlugin.Tablet;
+using OpenTabletDriver.Plugin.Tablet;
 
 namespace OpenTabletDriver.udev
 {

@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\libudev.Rules\libudev.Rules.csproj" />
-    <ProjectReference Include="..\..\OpenTabletDriver\TabletDriverPlugin\TabletDriverPlugin.csproj" />
+    <ProjectReference Include="..\..\OpenTabletDriver\OpenTabletDriver.Plugin\OpenTabletDriver.Plugin.csproj" />
   </ItemGroup>
 
 </Project>

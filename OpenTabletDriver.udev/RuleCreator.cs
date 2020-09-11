@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using libudev.Rules;
+﻿using libudev.Rules;
 using libudev.Rules.Names;
-using TabletDriverPlugin.Tablet;
+using OpenTabletDriver.Plugin.Tablet;
 
 namespace OpenTabletDriver.udev
 {
