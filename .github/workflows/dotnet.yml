@@ -1,0 +1,22 @@
+name: udev Rules
+on:
+  push:
+    branches:
+      - master
+  pull request:
+  jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@master
+        with:
+          dotnet-version: 3.1.108
+      - name: Create rules
+        run: |
+          bash ./build.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: rules
+          path: build/
