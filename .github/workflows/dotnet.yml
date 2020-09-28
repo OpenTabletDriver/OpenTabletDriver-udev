@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Checkout submodules
-          uses: textbook/git-checkout-submodule-action@2.1.1
+        uses: textbook/git-checkout-submodule-action@2.1.1
       - name: Setup .NET Core
         uses: actions/setup-dotnet@master
         with:
