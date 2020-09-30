@@ -6,6 +6,14 @@ namespace OpenTabletDriver.udev
 {
     internal static class RuleCreator
     {
+        public static Rule CreateAccessRule(string module, string mode)
+        {
+            return new Rule(
+                new Token("KERNEL", Operator.Equal, module),
+                new Token("MODE", Operator.Assign, mode)
+            );
+        }
+
         public static Rule CreateAccessRule(TabletProperties tablet, string subsystem, string mode)
         {
             return new Rule(
