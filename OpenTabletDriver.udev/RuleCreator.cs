@@ -1,6 +1,9 @@
-﻿using libudev.Rules;
+﻿using System.Collections.Generic;
+using System.Linq;
+using libudev.Rules;
 using libudev.Rules.Names;
 using OpenTabletDriver.Plugin.Tablet;
+using OpenTabletDriver.udev.Comparers;
 
 namespace OpenTabletDriver.udev
 {
@@ -14,24 +17,36 @@ namespace OpenTabletDriver.udev
             );
         }
 
-        public static Rule CreateAccessRule(TabletProperties tablet, string subsystem, string mode)
+        private static IEnumerable<DeviceIdentifier> GetDistinctIdentifiers(TabletConfiguration config)
         {
-            return new Rule(
-                new Token("SUBSYSTEM", Operator.Equal, subsystem),
-                new ATTRS("idVendor", Operator.Equal, tablet.DigitizerIdentifier.VendorID.ToHexFormat()),
-                new ATTRS("idProduct", Operator.Equal, tablet.DigitizerIdentifier.ProductID.ToHexFormat()),
-                new Token("MODE", Operator.Assign, mode)
-            );
+            var allIdentifiers = config.DigitizerIdentifiers.Concat(config.AuxilaryDeviceIdentifiers);
+            return allIdentifiers.Distinct(new IdentifierComparer());
         }
 
-        public static Rule CreateOverrideRule(TabletProperties tablet)
+        public static IEnumerable<Rule> CreateAccessRules(TabletConfiguration tablet, string subsystem, string mode)
         {
-            return new Rule(
-                new Token("SUBSYSTEM", Operator.Equal, "input"),
-                new ATTRS("idVendor", Operator.Equal, tablet.DigitizerIdentifier.VendorID.ToHexFormat()),
-                new ATTRS("idProduct", Operator.Equal, tablet.DigitizerIdentifier.ProductID.ToHexFormat()),
-                new ENV("LIBINPUT_IGNORE_DEVICE", Operator.Assign, "1")
-            );
+            foreach (var id in GetDistinctIdentifiers(tablet))
+            {
+                yield return new Rule(
+                    new Token("SUBSYSTEM", Operator.Equal, subsystem),
+                    new ATTRS("idVendor", Operator.Equal, id.VendorID.ToHexFormat()),
+                    new ATTRS("idProduct", Operator.Equal, id.ProductID.ToHexFormat()),
+                    new Token("MODE", Operator.Assign, mode)
+                );
+            }
+        }
+
+        public static IEnumerable<Rule> CreateOverrideRules(TabletConfiguration tablet)
+        {
+            foreach (var id in GetDistinctIdentifiers(tablet))
+            {
+                yield return new Rule(
+                    new Token("SUBSYSTEM", Operator.Equal, "input"),
+                    new ATTRS("idVendor", Operator.Equal, id.VendorID.ToHexFormat()),
+                    new ATTRS("idProduct", Operator.Equal, id.ProductID.ToHexFormat()),
+                    new ENV("LIBINPUT_IGNORE_DEVICE", Operator.Assign, "1")
+                );
+            }
         }
     }
 }
