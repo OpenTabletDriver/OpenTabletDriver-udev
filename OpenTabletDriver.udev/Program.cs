@@ -31,6 +31,9 @@ namespace OpenTabletDriver.udev
         {
             if (output.Exists)
                 output.Delete();
+            if (!output.Directory.Exists)
+                output.Directory.Create();
+            
             var path = output.FullName.Replace(Directory.GetCurrentDirectory(), string.Empty);
             Console.WriteLine($"Writing all rules to '{path}'...");
             using (var sw = output.AppendText())
