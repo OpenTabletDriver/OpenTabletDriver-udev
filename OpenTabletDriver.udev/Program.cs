@@ -54,7 +54,7 @@ namespace OpenTabletDriver.udev
 
         static IEnumerable<string> CreateRules(DirectoryInfo directory)
         {
-            yield return RuleCreator.CreateAccessRule("uinput", "0666");
+            yield return RuleCreator.CreateAccessRule("uinput", "misc");
             foreach (var tablet in GetAllConfigurations(directory))
             {
                 if (string.IsNullOrWhiteSpace(tablet.Name))
