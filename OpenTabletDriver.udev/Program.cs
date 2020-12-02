@@ -4,6 +4,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using OpenTabletDriver.Plugin.Tablet;
 
 namespace OpenTabletDriver.udev
@@ -79,8 +80,13 @@ namespace OpenTabletDriver.udev
             foreach (var path in files)
             {
                 var file = new FileInfo(path);
-                yield return TabletConfiguration.Read(file);
+                using (var fs = file.OpenRead())
+                using (var sr = new StreamReader(fs))
+                using (var jr = new JsonTextReader(sr))
+                    yield return jsonSerializer.Deserialize<TabletConfiguration>(jr);
             }
         }
+
+        static readonly JsonSerializer jsonSerializer = new JsonSerializer();
     }
 }
