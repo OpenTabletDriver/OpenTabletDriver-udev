@@ -57,10 +57,10 @@ namespace OpenTabletDriver.udev
             {
                 var module = id.VendorID == 1386 ? "wacom" : "hid_uclogic";
                 yield return new Rule(
-                    new Token("ACTION", Operator.Assign, "add"),
                     new Token("SUBSYSTEM", Operator.Equal, "input"),
                     new ATTRS("idVendor", Operator.Equal, id.VendorID.ToHexFormat()),
                     new ATTRS("idProduct", Operator.Equal, id.ProductID.ToHexFormat()),
+                    new Token("ACTION", Operator.Assign, "add"),
                     new Token("PROGRAM", Operator.Assign, $"/sbin/rmmod {module}")
                 );
             }
