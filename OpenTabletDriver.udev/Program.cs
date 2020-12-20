@@ -61,11 +61,14 @@ namespace OpenTabletDriver.udev
                 if (string.IsNullOrWhiteSpace(tablet.Name))
                     continue;
                 yield return string.Format("# {0}", tablet.Name);
-                
-                foreach (var rule in RuleCreator.CreateAccessRules(tablet, "hidraw", "0666"))
+
+                foreach (var rule in RuleCreator.CreateAccessRules(tablet, "hidraw"))
                     yield return rule;
-                
-                foreach (var rule in RuleCreator.CreateAccessRules(tablet, "usb", "0666"))
+
+                foreach (var rule in RuleCreator.CreateAccessRules(tablet, "usb"))
+                    yield return rule;
+
+                foreach (var rule in RuleCreator.CreateModuleRules(tablet))
                     yield return rule;
 
                 if (tablet.Attributes.TryGetValue("libinputoverride", out var value) && (value == "1" || value.ToLower() == "true"))
