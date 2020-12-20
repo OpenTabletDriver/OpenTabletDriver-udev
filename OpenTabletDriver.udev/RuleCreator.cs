@@ -9,6 +9,12 @@ namespace OpenTabletDriver.udev
 {
     internal static class RuleCreator
     {
+        private static IEnumerable<DeviceIdentifier> GetDistinctIdentifiers(TabletConfiguration config)
+        {
+            var allIdentifiers = config.DigitizerIdentifiers.Concat(config.AuxilaryDeviceIdentifiers);
+            return allIdentifiers.Distinct(new IdentifierComparer());
+        }
+
         public static Rule CreateAccessRule(string module, string subsystem)
         {
             return new Rule(
@@ -19,13 +25,7 @@ namespace OpenTabletDriver.udev
             );
         }
 
-        private static IEnumerable<DeviceIdentifier> GetDistinctIdentifiers(TabletConfiguration config)
-        {
-            var allIdentifiers = config.DigitizerIdentifiers.Concat(config.AuxilaryDeviceIdentifiers);
-            return allIdentifiers.Distinct(new IdentifierComparer());
-        }
-
-        public static IEnumerable<Rule> CreateAccessRules(TabletConfiguration tablet, string subsystem, string mode)
+        public static IEnumerable<Rule> CreateAccessRules(TabletConfiguration tablet, string subsystem)
         {
             foreach (var id in GetDistinctIdentifiers(tablet))
             {
@@ -33,7 +33,7 @@ namespace OpenTabletDriver.udev
                     new Token("SUBSYSTEM", Operator.Equal, subsystem),
                     new ATTRS("idVendor", Operator.Equal, id.VendorID.ToHexFormat()),
                     new ATTRS("idProduct", Operator.Equal, id.ProductID.ToHexFormat()),
-                    new Token("MODE", Operator.Assign, mode)
+                    new Token("TAG", Operator.Add, "uaccess")
                 );
             }
         }
@@ -47,6 +47,21 @@ namespace OpenTabletDriver.udev
                     new ATTRS("idVendor", Operator.Equal, id.VendorID.ToHexFormat()),
                     new ATTRS("idProduct", Operator.Equal, id.ProductID.ToHexFormat()),
                     new ENV("LIBINPUT_IGNORE_DEVICE", Operator.Assign, "1")
+                );
+            }
+        }
+
+        public static IEnumerable<Rule> CreateModuleRules(TabletConfiguration tablet)
+        {
+            foreach (var id in GetDistinctIdentifiers(tablet))
+            {
+                var module = id.VendorID == 1386 ? "wacom" : "hid_uclogic";
+                yield return new Rule(
+                    new Token("ACTION", Operator.Assign, "add"),
+                    new Token("SUBSYSTEM", Operator.Equal, "input"),
+                    new ATTRS("idVendor", Operator.Equal, id.VendorID.ToHexFormat()),
+                    new ATTRS("idProduct", Operator.Equal, id.ProductID.ToHexFormat()),
+                    new Token("PROGRAM", Operator.Assign, $"/sbin/rmmod {module}")
                 );
             }
         }
